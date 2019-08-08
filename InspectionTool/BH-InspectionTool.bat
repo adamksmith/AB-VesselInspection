@@ -1,0 +1,1 @@
+java -classpath src TankInspection configs/BH.cfg data/BH.csv

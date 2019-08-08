@@ -1,0 +1,1 @@
+java -classpath src TankReporting configs/SC.cfg data/SC.csv

@@ -1,0 +1,1 @@
+java -classpath src TankInspection configs/Chips.cfg data/Chips.csv
