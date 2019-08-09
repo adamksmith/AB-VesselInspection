@@ -20,8 +20,10 @@ public class Inspection {
     public JTextField name = new JTextField();
     public JFrame main;
     Map<String, InspecElement> buttons = new HashMap<String, InspecElement>();
+    private ArrayList<String> selections;
 
     public Inspection(String inspection, String file, final ArrayList<String> selections) {
+        this.selections = selections;
         //Button functions here:
         cancel.addActionListener(new ActionListener() {
             @Override
@@ -39,6 +41,12 @@ public class Inspection {
                 } else {
                     System.out.println(Arrays.toString(selections.toArray()) + Arrays.toString(readEntries()));
                     TriggerSuccess trigger = new TriggerSuccess();
+                    try {
+                        Thread.sleep(4000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                    main.dispose();
                 }
             }
         });
@@ -141,9 +149,13 @@ public class Inspection {
     }
 
     public String[] readEntries() {
+        UUID uuid = UUID.randomUUID();
+        String randomUUIDString = uuid.toString();
         ArrayList<String> returns = new ArrayList<String>();
         returns.add(name.getText());
+        SQLInterface sql = new SQLInterface("H:\\Code\\DB\\vesselInspection.db");
         for (Map.Entry<String, InspecElement> entry : buttons.entrySet()) {
+            sql.formatedInput(selections.get(2), selections.get(3), selections.get(0), name.getText(), entry.getKey(), entry.getValue().getStatus(), uuid.toString());
             returns.add(entry.getValue().getStatus());
         }
         return returns.toArray(new String[0]);
