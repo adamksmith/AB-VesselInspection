@@ -16,7 +16,7 @@ public class SQLInterface {
             String dbURL = "jdbc:ucanaccess://" + file;
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
             //Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + file);
+            connection = DriverManager.getConnection(dbURL);
             System.out.println("Connected");
 
 
@@ -53,8 +53,9 @@ public class SQLInterface {
 
     public void formatedInput(String vesselType, String vesselID, String location, String name, String inspection
             , String inspectionResult, String UUID) {
-        String str = "INSERT INTO vesselInspection VALUES ('" + vesselType + "','" + vesselID + "', '" + location + "', '" + inspection + "'" +
-                ", '" + inspectionResult + "', '" + name + "', CURRENT_DATE, '" + UUID + "')";
+        String str = "INSERT INTO vesselInspection VALUES (00,'" + vesselID + "','" + location + "', '" + inspection + "', '" + inspectionResult + "'" +
+                ", '" + name + "', CURRENT_DATE, '" + UUID + "', '" + vesselType + "');";
+
         writeData(str);
 
     }
