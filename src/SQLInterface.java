@@ -12,7 +12,10 @@ public class SQLInterface {
 
 
         try {
-            Class.forName("org.sqlite.JDBC");
+            String msAccDB = "D:/WORKSPACE/TEST_WORKSPACE/Java-JDBC/Player.accdb";
+            String dbURL = "jdbc:ucanaccess://" + file;
+            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            //Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + file);
             System.out.println("Connected");
 
