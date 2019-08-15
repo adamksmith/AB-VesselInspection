@@ -8,7 +8,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Scanner;
 
 public class VesselInspection {
@@ -25,48 +31,11 @@ public class VesselInspection {
 
     private static String[] Location = {"Select Side", "Hot Side", "Cold Side"};
     private static String[] VesselType = {"Please Select a Location"};
-    private static String[] VesselID = {"Please Select a Vessel Type"};
-    private static String[] VesselCheck = {"Please Complete the Vessel Selection Process"};
-    //Main window Variables
-    //Dialouge Variables
-    private static JFrame dialoge;
-    private static JPanel diagroot;
-    private static JLabel name;
-    private static JLabel comments;
-    private static JTextField textField1;
-    private static JRadioButton passRadioButton;
-    private static JRadioButton failRadioButton;
-    private static JTextField editorPane1;
-    private static JButton submit;
-    private static JButton cancel;
-    private static JButton SOP;
+    private static String[] VesselID = {"Please Select an Inspection"};
+    private static String[] VesselCheck = {"Please Complete the Inspection Selection Process"};
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SQLInterface sql = new SQLInterface("I:\\OPERATOR\\Brewing\\Vessel Inspection Tool\\InspectionTool\\DB\\vesselInspection.accdb");
 
-
-    private static void setupDiag() {
-        diagroot = new JPanel();
-        textField1 = new JTextField(12);
-        passRadioButton = new JRadioButton("Pass");
-        failRadioButton = new JRadioButton("Fail");
-        editorPane1 = new JTextField(32);
-        name = new JLabel("Name:");
-        comments = new JLabel("Comments:");
-        submit = new JButton("Submit");
-        cancel = new JButton("Cancel");
-        Dimension size = new Dimension(20, 30);
-        editorPane1.setMinimumSize(size);
-        SOP = new JButton("Load SOP");
-
-        diagroot.add(SOP);
-        diagroot.add(name);
-        diagroot.add(textField1);
-        diagroot.add(passRadioButton);
-        diagroot.add(failRadioButton);
-        diagroot.add(comments);
-        diagroot.add(editorPane1);
-        diagroot.add(submit);
-        diagroot.add(cancel);
-        diagroot.updateUI();
-    }
 
     private static void setupUI() {
         rootPanel = new JPanel(new BorderLayout(5, 5));
@@ -87,7 +56,7 @@ public class VesselInspection {
         final JLabel label3 = new JLabel();
         Font label3Font = getFont(null, -1, 16, label3.getFont());
         if (label3Font != null) label3.setFont(label3Font);
-        label3.setText("Vessel Type:");
+        label3.setText("Inspection Type:");
         rootPanel.add(label3, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         rootPanel.add(spacer1, new GridConstraints(8, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
@@ -125,7 +94,7 @@ public class VesselInspection {
         final JLabel label5 = new JLabel();
         Font label5Font = getFont(null, -1, 16, label3.getFont());
         if (label5Font != null) label5.setFont(label5Font);
-        label5.setText("Vessel Number:");
+        label5.setText("Equipment Number:");
         rootPanel.add(label5, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         comboBox4 = new JComboBox();
         final DefaultComboBoxModel defaultComboBoxModel4 = new DefaultComboBoxModel(VesselCheck);
@@ -135,13 +104,6 @@ public class VesselInspection {
         button1 = new JButton();
         button1.setText("Complete Form");
         rootPanel.add(button1, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-//        loadNextMenuButton = new JButton();
-//        loadNextMenuButton.setText("Load Next Menu");
-//        rootPanel.add(loadNextMenuButton, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-//        loadNextMenuButton1 = new JButton();
-//        loadNextMenuButton1.setText("Load Next Menu");
-//        rootPanel.add(loadNextMenuButton1, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-
 
         textArea1 = new JTextArea();
 
@@ -225,7 +187,7 @@ public class VesselInspection {
             public void actionPerformed(ActionEvent e) {
                 int Loc = comboBox1.getSelectedIndex();
                 comboBox3.enable();
-                textArea1.setText(loadDue((String) comboBox2.getSelectedItem()));
+
 //
                 String[] ves;
                 switch (Loc) {
@@ -248,7 +210,11 @@ public class VesselInspection {
             @Override
             public void actionPerformed(ActionEvent e) {
                 comboBox4.enable();
-                comboBox4.setModel(new DefaultComboBoxModel(readcfg("_VesselDB/" + (String) comboBox3.getSelectedItem() + ".cfg").toArray()));
+                ArrayList<String> vesselDB;
+                vesselDB = readcfg("_VesselDB/" + (String) comboBox3.getSelectedItem() + ".cfg");
+                String dueFreq = vesselDB.remove(0);
+                textArea1.setText(renderDue((String) comboBox3.getSelectedItem(), dueFreq, vesselDB));
+                comboBox4.setModel(new DefaultComboBoxModel(vesselDB.toArray()));
             }
         });
         button1.addActionListener(new ActionListener() {
@@ -322,12 +288,7 @@ public class VesselInspection {
 
     }
 
-    public static String loadDue(String searchterm) {
 
-
-        return "Vessels Due for: " + searchterm + "\n" +
-                "This will populate once I finish it";
-    }
 
     public static String[] intializePos(String file) {
         ArrayList<String> readIn = readcfg(file);
@@ -355,6 +316,49 @@ public class VesselInspection {
 
         }
         return readOut.get(selectedIndex);
+    }
+
+    private static String renderDue(String s, String dueFreq, ArrayList<String> eqipID) {
+        ArrayList<String> returnArray = (ArrayList<String>) eqipID.clone();
+        getDate(Integer.parseInt(dueFreq));
+        ResultSet rs = sql.readData("select * from vesselInspection where Date >= '" + getDate(Integer.parseInt(dueFreq)) + "'");
+        while (true) {
+            try {
+                if (!rs.next()) break;
+                returnArray.remove(rs.getString("VesselID"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        String returns = "";
+        int i = 0;
+        for (String e : returnArray) {
+            returns += e + ", ";
+            i++;
+            if (i == 8) {
+                returns += "\n";
+                i = 0;
+            }
+        }
+        return returns;
+
+    }
+
+    private static String getDate(int i) {
+        Date currentDate = new Date();
+        System.out.println(dateFormat.format(currentDate));
+
+        // convert date to calendar
+        Calendar c = Calendar.getInstance();
+        c.setTime(currentDate);
+
+        // manipulate date
+        c.add(Calendar.HOUR, -(i * 24));
+        // convert calendar to date
+        Date currentDatePlusOne = c.getTime();
+
+        System.out.println(dateFormat.format(currentDatePlusOne));
+        return dateFormat.format(currentDatePlusOne);
     }
 }
 

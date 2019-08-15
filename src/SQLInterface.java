@@ -54,7 +54,7 @@ public class SQLInterface {
     public void formatedInput(String vesselType, String vesselID, String location, String name, String inspection
             , String inspectionResult, String UUID) {
         String str = "INSERT INTO vesselInspection VALUES (00,'" + vesselID + "','" + location + "', '" + inspection + "', '" + inspectionResult + "'" +
-                ", '" + name + "', CURRENT_DATE, '" + UUID + "', '" + vesselType + "');";
+                ", '" + name + "', '" + UUID + "', '" + vesselType + "',CURRENT_DATE);";
 
         writeData(str);
 
