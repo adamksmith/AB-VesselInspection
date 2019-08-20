@@ -21,7 +21,7 @@ public class TriggerSuccess {
         warning.setSize(50, 20);
         warning.pack();
         try {
-            Thread.sleep(10000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

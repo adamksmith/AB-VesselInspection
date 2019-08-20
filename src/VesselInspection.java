@@ -24,10 +24,11 @@ public class VesselInspection {
     private static JComboBox comboBox2;
     private static JComboBox comboBox3;
     private static JTextArea textArea1;
-//    private static JList list1;
 
     private static JComboBox comboBox4;
     private static JButton button1;
+    private static JButton refresh;
+    private static JButton cancel;
 
     private static String[] Location = {"Select Side", "Hot Side", "Cold Side"};
     private static String[] VesselType = {"Please Select a Location"};
@@ -38,6 +39,7 @@ public class VesselInspection {
 
 
     private static void setupUI() {
+        //this initializes the Main window UI
         rootPanel = new JPanel(new BorderLayout(5, 5));
         rootPanel.setLayout(new GridLayoutManager(9, 5, new Insets(0, 0, 0, 0), -1, -1));
         final JPanel panel1 = new JPanel();
@@ -67,9 +69,7 @@ public class VesselInspection {
         final JLabel label4 = new JLabel();
         label4.setText("Due for Inspection");
         rootPanel.add(label4, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-//        list1 = new JList();
-//        rootPanel.add(list1, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
-//        list1.add("Tank", "Tank");
+
         comboBox1 = new JComboBox();
         comboBox1.setEditable(false);
         final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel(Location);
@@ -88,9 +88,6 @@ public class VesselInspection {
 
         comboBox3.setModel(defaultComboBoxModel3);
         rootPanel.add(comboBox3, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-//        loadSelectionButton = new JButton();
-//        loadSelectionButton.setText("Load Selection");
-//        rootPanel.add(loadSelectionButton, new GridConstraints(3, 1, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label5 = new JLabel();
         Font label5Font = getFont(null, -1, 16, label3.getFont());
         if (label5Font != null) label5.setFont(label5Font);
@@ -104,6 +101,10 @@ public class VesselInspection {
         button1 = new JButton();
         button1.setText("Complete Form");
         rootPanel.add(button1, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        refresh = new JButton("Refresh Due List");
+        rootPanel.add(refresh, new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cancel = new JButton("Cancel");
+        rootPanel.add(cancel, new GridConstraints(6, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 
         textArea1 = new JTextArea();
 
@@ -145,8 +146,8 @@ public class VesselInspection {
     }
 
     public static void main(String args[]) {
-
-        JFrame frame = new JFrame("Main");
+        //Runs the main window
+        final JFrame frame = new JFrame("Main");
         setupUI();
         frame.setContentPane(rootPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -234,6 +235,26 @@ public class VesselInspection {
                     warn = new TriggerWarn("Please complete all fields");
             }
         });
+        cancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+            }
+        });
+        refresh.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!comboBox3.isEnabled()) {
+                    TriggerWarn warn = new TriggerWarn("You must first select an inspection type!");
+
+                } else {
+                    ArrayList<String> vesselDB;
+                    vesselDB = readcfg("_VesselDB/" + (String) comboBox3.getSelectedItem() + ".cfg");
+                    String dueFreq = vesselDB.remove(0);
+                    textArea1.setText(renderDue((String) comboBox3.getSelectedItem(), dueFreq, vesselDB));
+                }
+            }
+        });
 
 
     }
@@ -256,39 +277,6 @@ public class VesselInspection {
 
         return returns;
     }
-
-    public static ArrayList<String> getTankList(String filename) {
-        String[] tanksRaw = readcfg(filename).toArray(new String[0]);
-        ArrayList<String> returns = new ArrayList<String>();
-
-        for (String s : tanksRaw) {
-            String[] splited = s.split(" ");
-            returns.add(splited[0]);
-        }
-        return returns;
-    }
-
-    public static ArrayList<Integer> getTankNumber(int index, String filename) {
-        System.out.println(index);
-        String[] tanksRaw = readcfg(filename).toArray(new String[0]);
-        ArrayList<String> returns = new ArrayList<String>();
-
-        for (String s : tanksRaw) {
-            String[] splited = s.split(" ");
-            returns.add(splited[1]);
-        }
-        int number = Integer.parseInt(returns.get(index));
-        System.out.println(number);
-        ArrayList<Integer> returnList = new ArrayList<Integer>();
-        for (int i = 1; i <= number; i++) {
-            returnList.add(i);
-        }
-        System.out.println(returnList.toString());
-        return returnList;
-
-    }
-
-
 
     public static String[] intializePos(String file) {
         ArrayList<String> readIn = readcfg(file);
@@ -321,7 +309,7 @@ public class VesselInspection {
     private static String renderDue(String s, String dueFreq, ArrayList<String> eqipID) {
         ArrayList<String> returnArray = (ArrayList<String>) eqipID.clone();
         getDate(Integer.parseInt(dueFreq));
-        ResultSet rs = sql.readData("select * from vesselInspection where Date >= '" + getDate(Integer.parseInt(dueFreq)) + "'");
+        ResultSet rs = sql.readData("select * from vesselInspection where Date >= '" + getDate(Integer.parseInt(dueFreq)) + "' and VesselType like'" + s + "'");
         while (true) {
             try {
                 if (!rs.next()) break;
@@ -346,7 +334,7 @@ public class VesselInspection {
 
     private static String getDate(int i) {
         Date currentDate = new Date();
-        System.out.println(dateFormat.format(currentDate));
+
 
         // convert date to calendar
         Calendar c = Calendar.getInstance();
@@ -357,7 +345,7 @@ public class VesselInspection {
         // convert calendar to date
         Date currentDatePlusOne = c.getTime();
 
-        System.out.println(dateFormat.format(currentDatePlusOne));
+
         return dateFormat.format(currentDatePlusOne);
     }
 }

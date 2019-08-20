@@ -42,7 +42,7 @@ public class Inspection {
                     System.out.println(Arrays.toString(selections.toArray()) + Arrays.toString(readEntries()));
                     TriggerSuccess trigger = new TriggerSuccess();
                     try {
-                        Thread.sleep(4000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
