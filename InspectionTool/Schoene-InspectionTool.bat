@@ -1,1 +1,0 @@
-java -classpath src TankInspection configs/SC.cfg data/SC.csv

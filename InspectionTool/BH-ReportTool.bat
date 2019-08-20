@@ -1,1 +1,0 @@
-java -classpath src TankReporting configs/BH.cfg data/BH.csv
